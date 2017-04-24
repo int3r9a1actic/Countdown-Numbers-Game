@@ -2,18 +2,6 @@
 # 21 August 2016
 # Jason White
 
-# count
-# 21 August 2016
-# 1. Lists of numbers to choose from
-# 2. Choose numbers
-# 3. Generate permutations
-
-# count
-# 19 April 2017
-# 1. Added combinations of operators
-# 2. Added generaion of sums
-# 2. Added sums for a solutions
-
 # countdown2
 # 22 April 2017
 # 1. Put functions in
@@ -25,7 +13,25 @@
 import itertools
 import random
 
-def opcombs(in_nums):
+def select_numbers():
+    # Return a list of numbers to choose from
+    high = list(range(25, 125, 25))
+    low  = list(range(1, 11)) * 2
+    random.shuffle(high)
+    random.shuffle(low)
+    num_high = random.randint(0, 4)
+    num_low  = 6 - num_high
+    return high[0:num_high] + low[0:num_low]
+
+def number_permutations(in_numbers):
+    # create a list of all possible permutations
+    perms = []
+    for i in range(2, len(in_numbers) + 1):
+        perms += list(itertools.permutations(in_numbers, i))
+    return perms
+    
+def operator_combinations(in_nums):
+    # Return all the combinations of operators
     length = len(in_nums) - 1
     ops = ["+", "-", "*", "/"]
     sums = ops
@@ -38,18 +44,20 @@ def opcombs(in_nums):
             sums = tmp
     return sums
 
-# create lists of numbers to choose from
-numbers_high = list(range(25, 125, 25))
-numbers_low  = list(range(1, 11)) * 2
-random.shuffle(numbers_high)
-random.shuffle(numbers_low)
+def create_sums(number_perms):
+    sums = []
+    for i in number_perms:
+        for j in operator_combinations(i):
+            tmp = [i[0]]
+            for k in range(len(j)):
+                tmp.append(j[k])
+                tmp.append(i[k + 1])
+            sums.append(tmp)
+    return sums
 
 # computer chooses numbers to use to reach target
-selected_high = random.randint(0, 4)
-selected_low  = 6 - selected_high
 
-selected_numbers = numbers_high[0:selected_high]
-selected_numbers += numbers_low[0:selected_low]
+selected_numbers = select_numbers()
 
 print("Selected numbers : ", selected_numbers)
 
@@ -57,28 +65,18 @@ print("Selected numbers : ", selected_numbers)
 target = random.randint(100, 999)
 print("Target number    : ", target)
 
-# create a list of all possible permutations
-permutations = []
-for i in range(2, len(selected_numbers) + 1):
-    permutations += list(itertools.permutations(selected_numbers, i))
+number_perms = number_permutations(selected_numbers)
 
-# create sums
+sums = create_sums(number_perms)
 
-sums = []
-for i in permutations:
-    for j in opcombs(i):
-        tmp = str(i[0])
-        for k in range(len(j)):
-            tmp += j[k]
-            tmp += str(i[k + 1])
-        sums.append(tmp)
+print(random.choice(sums))
 
 # check sums for solution
 
 found = False
 for sum in sums:
     if target == eval(sum):
-        print("Solution         : ", sum, "=", int(eval(sum)))
+        print("Solution         : ", sum, "=", eval(sum))
         found = True
         break
 if not found:
